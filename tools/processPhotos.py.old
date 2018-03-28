@@ -1,0 +1,90 @@
+import os
+import sys
+import fnmatch
+from pymongo import MongoClient
+import fnmatch
+import exifread
+from libxmp.utils import file_to_dict
+from libxmp import consts
+from pprint import pprint
+
+rootdir = "/Volumes/usbdrive1/photos"
+
+dbClient = MongoClient()
+db = dbClient.photosdb
+
+# Remove existing data
+result = db.photos.delete_many({})
+print (result.deleted_count, "photos deleted from database")
+
+numPhotos = 0;
+for root, dirnames, filenames in os.walk(rootdir):
+    for filename in filenames:
+        if filename.endswith(('.jpg', '.JPG')):
+            fullPath = os.path.join(root, filename)
+            print ("TCDEBUG: processing file", fullPath)
+            f = open(fullPath, 'rb')
+###            exifTags = exifread.process_file(f, details=False)
+###            for tag in exifTags.keys():
+###                print ("%s = %s" % (tag, exifTags[tag]))
+
+            xmpTags = file_to_dict(fullPath)
+            title = ''
+            keywords = ''
+            if consts.XMP_NS_DC in xmpTags:
+                dublinCoreProperties = xmpTags[consts.XMP_NS_DC] # dublin core properties
+                for tag in dublinCoreProperties:
+                    tagName = tag[0]
+                    tagValue = tag[1]
+                    if tagValue != "" and tagName.startswith('dc:title'):
+                        title = title + tagValue
+                    elif tagValue != "" and tagName.startswith('dc:subject'):
+                        keywords = keywords + tagValue + " "
+
+            print ("Title", title)
+            print ("Keywords", keywords)
+
+            photoData = {}
+            photoData["filename"] = fullPath
+            photoData["type"] = "jpg"
+            photoData["type"] = "jpg"
+            photoData["photoId"] = numPhotos+1
+            if title != "":
+                photoData["title"] = title
+            if keywords != "":
+                photoData["keywords"] = keywords
+###            if "Image ImageDescription" in exifTags:
+###                photoData["description"] = exifTags["Image Description"].printable
+###            if "Image Make" in exifTags:
+###                photoData["cameraMake"] = exifTags["Image Make"].printable
+###            if "Image Model" in exifTags:
+###                photoData["cameraModel"] = exifTags["Image Model"].printable
+###            if "Image DateTime" in exifTags:
+###                photoData["dateTime"] = exifTags["Image DateTime"].printable
+###            if "EXIF ExposureTime" in exifTags:
+###                photoData["exposureTime"] = exifTags["EXIF ExposureTime"].printable
+###            if "EXIF FNumber" in exifTags:
+###                photoData["fNumber"] = exifTags["EXIF FNumber"].printable
+###            if "EXIF ExposureProgram" in exifTags:
+###                photoData["exposureProgram"] = exifTags["EXIF ExposureProgram"].printable
+###            if "EXIF ISOSpeedRatings" in exifTags:
+###                photoData["isoSpeedRatings"] = exifTags["EXIF ISOSpeedRatings"].printable
+###            if "EXIF MeteringMode" in exifTags:
+###                photoData["meteringMode"] = exifTags["EXIF MeteringMode"].printable
+###            if "EXIF Flash" in exifTags:
+###                photoData["flash"] = exifTags["EXIF Flash"].printable
+###            if "EXIF ExifImageWidth" in exifTags:
+###                photoData["width"] = exifTags["EXIF ExifImageWidth"].printable
+###            if "EXIF ExifImageLength" in exifTags:
+###                photoData["height"] = exifTags["EXIF ExifImageLength"].printable
+
+
+            result = db.photos.insert_one(photoData)
+            numPhotos = numPhotos + 1
+
+print (numPhotos, "photos added")
+
+###print("Database contents")
+###for photo in photosTable.find():
+###    print photo
+
