@@ -1,4 +1,4 @@
-console.log("TCDEBUG: server/index.js");
+console.log(new Date() + "  TCDEBUG: server/index.js");
 var path = require('path');
 var babelConfig = require('../package').babelConfig.server;
 

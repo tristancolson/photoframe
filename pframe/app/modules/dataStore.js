@@ -4,22 +4,17 @@ var _ = require('lodash');
 class DataStore {
 
 
-@observable isError = false;
-@observable errorMessage = "";
-@observable statusMessage = "";
-@observable isStoreInitialized = false;
+// @observable isError = false;
+// @observable errorMessage = "";
+// @observable statusMessage = "";
+// @observable isStoreInitialized = false;
 
 @action initializePframe = () => {
 } // initalizePframe
 
-
-
-
-
-sleep = (time) => {
-    return new Promise((resolve) => setTimeout(resolve, time));
-} // sleep
-
+// sleep = (time) => {
+//     return new Promise((resolve) => setTimeout(resolve, time));
+// } // sleep
 
 
 } // class
