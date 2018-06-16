@@ -12,31 +12,40 @@ photoRootDir = "/Volumes/usbdrive1/photos"
 class SendPhoto(WebSocket):
 
     def handleMessage(self):
-        print (str(datetime.datetime.now()), "TCDEBUG handleMessage: ", self.data)
-
-        # generate random number based on total photos
-        cur.execute("select count(*) from photos")
-        result = cur.fetchone()
-        totalPhotos = result[0]
-        print("TCDEBUG: there are ", totalPhotos, " photos")
-        r = random.randint(1, totalPhotos)
-        print("TCDEBUG: random num is ", r)
-
-        # select that photo from the db
-        q = "select * from photos limit 1 offset " + str(r)
-        print("TCDEBUG: q is ", q)
-        cur.execute(q)
-        row = cur.fetchone()
-        filename = row[1]
-        type = row[2]
+        print("SERVER: handleMessage starting")
+        try:
+            if self.data == "SendPhoto":
+                print(str(datetime.datetime.now()), " SERVER: SendPhoto message");
+                # generate random number based on total photos
+                cur.execute("select count(*) from photos")
+                result = cur.fetchone()
+                totalPhotos = result[0]
+                r = random.randint(1, totalPhotos)
         
-        print("TCDEBUG: filename is ", filename)
-        print("TCDEBUG: type is ", type)
-        with open(filename, mode='rb') as photoFile: 
-            fileContent = photoFile.read()
+                # select that photo from the db
+                q = "select * from photos limit 1 offset " + str(r)
+    ###            print("SERVER: q is ", q)
+                cur.execute(q)
+                row = cur.fetchone()
+                filename = row[1]
+                type = row[2]
+                
+                print("SERVER: filename is ", filename)
+                with open(filename, mode='rb') as photoFile: 
+                    fileContent = photoFile.read()
+        
+                # send to the client
+                print("SERVER: before sendMessage")
+                self.sendMessage(fileContent)
+                print("SERVER: after sendMessage")
+            else:
+                print(str(datetime.datetime.now()), "CLIENT  message ", self.data)
+        except Exception as e:
+            print("SERVER: exception: " , e)
+            os.kill(os.getPid(), signal.SIGTERM)
+        else:
+            print("SERVER: completed handleMessage")
 
-        # send to the client
-        self.sendMessage(fileContent)
 
     def handleConnected(self):
         print(self.address, 'connected')
