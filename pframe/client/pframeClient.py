@@ -67,10 +67,10 @@ def on_message(ws, message):
         print("CLIENT: completed on_message")
 
 def on_error(ws, error):
-    print(error)
+    print("CLIENT: on_error", error)
 
 def on_close(ws):
-    print("### closed ###")
+    print("CLIENT: on_close")
 
 if __name__ == "__main__":
     try:
@@ -90,17 +90,50 @@ if __name__ == "__main__":
             time.sleep(1)
             conn_timeout -= 1
 
+        print("===========")
+        for attr in dir(ws):
+            print("obj.%s = %r" % (attr, getattr(ws, attr)))
+        print("===========")
 
         i = 0
         while ws.sock.connected:
+            if ws.sock.connected:
+                print(str(datetime.datetime.now()) + " TCDEBUG: a ws.sock.connected is " + str(ws.sock.connected));
+            else:
+                print(str(datetime.datetime.now()) + " TCDEBUG: a ws.sock.connected is GONE");
+
             i = i + 1
             ws.send("CLIENT: start loop: " + str(i))
-            print(str(datetime.datetime.now()) + " TCDEBUG: a")
+            if ws.sock.connected:
+                print(str(datetime.datetime.now()) + " TCDEBUG: b ws.sock.connected is " + str(ws.sock.connected));
+            else:
+                print(str(datetime.datetime.now()) + " TCDEBUG: b ws.sock.connected is GONE");
+
+            print(str(datetime.datetime.now()) + " TCDEBUG: before SendPhoto " + str(i))
             ws.send("SendPhoto")
-            print(str(datetime.datetime.now()) + " TCDEBUG: b currentPid is " + str(currentPid))
-            print(str(datetime.datetime.now()) + " TCDEBUG: c")
-            time.sleep(20)
+            if ws.sock.connected:
+                print(str(datetime.datetime.now()) + " TCDEBUG: c ws.sock.connected is " + str(ws.sock.connected));
+            else:
+                print(str(datetime.datetime.now()) + " TCDEBUG: c ws.sock.connected is GONE");
+
+            print(str(datetime.datetime.now()) + " TCDEBUG: after SendPhoto")
+            time.sleep(120)
+            if ws.sock.connected:
+                print(str(datetime.datetime.now()) + " TCDEBUG: d ws.sock.connected is " + str(ws.sock.connected));
+            else:
+                print(str(datetime.datetime.now()) + " TCDEBUG: d ws.sock.connected is GONE");
             ws.send("CLIENT: end loop: " + str(i))
+            print("CLIENT: end loop: " + str(i))
+            if ws.sock.connected:
+                print(str(datetime.datetime.now()) + " TCDEBUG: e ws.sock.connected is " + str(ws.sock.connected));
+            else:
+                print(str(datetime.datetime.now()) + " TCDEBUG: e ws.sock.connected is GONE");
+
+        if ws.sock.connected:
+            print(str(datetime.datetime.now()) + " TCDEBUG: f ws.sock.connected is " + str(ws.sock.connected));
+        else:
+            print(str(datetime.datetime.now()) + " TCDEBUG: f ws.sock.connected is GONE");
+        print("CLIENT: ws.sock.connected LOOP ENDS")
 
     except Exception as e:
         print("MAIN ERROR: exception: ", e);

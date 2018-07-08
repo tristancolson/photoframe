@@ -12,10 +12,10 @@ photoRootDir = "/Volumes/usbdrive1/photos"
 class SendPhoto(WebSocket):
 
     def handleMessage(self):
-        print("SERVER: handleMessage starting")
         try:
             if self.data == "SendPhoto":
                 print(str(datetime.datetime.now()), " SERVER: SendPhoto message");
+
                 # generate random number based on total photos
                 cur.execute("select count(*) from photos")
                 result = cur.fetchone()
@@ -24,7 +24,6 @@ class SendPhoto(WebSocket):
         
                 # select that photo from the db
                 q = "select * from photos limit 1 offset " + str(r)
-    ###            print("SERVER: q is ", q)
                 cur.execute(q)
                 row = cur.fetchone()
                 filename = row[1]
@@ -35,23 +34,19 @@ class SendPhoto(WebSocket):
                     fileContent = photoFile.read()
         
                 # send to the client
-                print("SERVER: before sendMessage")
                 self.sendMessage(fileContent)
-                print("SERVER: after sendMessage")
             else:
                 print(str(datetime.datetime.now()), "CLIENT  message ", self.data)
         except Exception as e:
             print("SERVER: exception: " , e)
             os.kill(os.getPid(), signal.SIGTERM)
-        else:
-            print("SERVER: completed handleMessage")
 
 
     def handleConnected(self):
-        print(self.address, 'connected')
+        print(self.address, ' connected')
 
     def handleClose(self):
-        print(self.address, 'closed')
+        print(str(datetime.datetime.now()), self.address, 'closed')
 
 
 try:
