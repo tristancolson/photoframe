@@ -53,6 +53,7 @@ for root, dirnames, filenames in os.walk(rootdir):
 
             title = ''
             keywords = ''
+            description = ''
             if consts.XMP_NS_DC in xmpTags:
                 dublinCoreProperties = xmpTags[consts.XMP_NS_DC] # dublin core properties
                 for tag in dublinCoreProperties:
@@ -62,6 +63,9 @@ for root, dirnames, filenames in os.walk(rootdir):
                         title = title + tagValue
                     elif tagValue != "" and tagName.startswith('dc:subject'):
                         keywords = keywords + tagValue + " "
+                    elif tagValue != "" and tagName.startswith('dc:description'):
+                        description = description + tagValue
+
 
 ###            if title != "":
 ###                photoData["title"] = title
@@ -87,6 +91,10 @@ for root, dirnames, filenames in os.walk(rootdir):
 ###                photoData["meteringMode"] = exifTags["EXIF MeteringMode"].printable
 ###            if "EXIF Flash" in exifTags:
 ###                photoData["flash"] = exifTags["EXIF Flash"].printable
+
+            print("TCDEBUG: title is ", title)
+            print("TCDEBUG: keywords is ", keywords)
+            print("TCDEBUG: description is ", description)
             width = 0
             if "EXIF ExifImageWidth" in exifTags:
                 width = exifTags["EXIF ExifImageWidth"].printable
@@ -94,8 +102,8 @@ for root, dirnames, filenames in os.walk(rootdir):
             if "EXIF ExifImageLength" in exifTags:
                 height = exifTags["EXIF ExifImageLength"].printable
             type = "jpg"
-            insertCmd = "Insert into photos (filename, type, width, height) values (%s, %s, %s, %s)"
-            cur.execute(insertCmd, (fullPath, type, width, height))
+            insertCmd = "Insert into photos (filename, type, width, height, title, description) values (%s, %s, %s, %s, %s, %s)"
+            cur.execute(insertCmd, (fullPath, type, width, height, title, description))
             numPhotos = numPhotos + 1
 
 dbConn.commit()
